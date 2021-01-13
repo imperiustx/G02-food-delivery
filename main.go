@@ -1,16 +1,16 @@
 package main
 
 import (
-	"fooddlv/module/note/notebusiness"
+	"fooddlv/appctx"
+	"fooddlv/middleware"
 	"fooddlv/module/note/notemodel"
-	"fooddlv/module/note/notestorage"
+	"fooddlv/module/note/notetransport/ginnote"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 )
 
 type Login struct {
@@ -48,7 +48,11 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	appCtx := appctx.NewAppContext(db)
+
 	r := gin.Default()
+	r.Use(middleware.Recover(appCtx))
+
 	//
 	//r.GET("/ping", func(c *gin.Context) {
 	//	c.JSON(http.StatusOK, gin.H{
@@ -63,54 +67,15 @@ func main() {
 
 	notes := v1.Group("/notes")
 	{
-		notes.GET("", func(c *gin.Context) {
-			//store := notestorage.NewSQLStore(db)
-			//notes, err := store.ListNote()
-
-			bizNote := notebusiness.NewListNoteBiz(fakeListNoteStore{})
-			notes, err := bizNote.ListAllNote()
-
-			if err != nil {
-				c.JSON(400, gin.H{"error": err.Error()})
-				return
-			}
-
-			c.JSON(200, notes)
-		})
-
-		notes.POST("", func(c *gin.Context) {
-			var data Note
-			if err := c.ShouldBindJSON(&data); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
-
-			db.Create(&data)
-
-			c.JSON(http.StatusOK, data)
-		})
+		notes.GET("", ginnote.ListNote(appCtx))
+		notes.POST("", ginnote.CreateNote(appCtx))
 		notes.GET("/:note-id", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
 				"data": c.Param("note-id"),
 			})
 		})
 		notes.PUT("/:note-id")
-		notes.DELETE("/:note-id", func(c *gin.Context) {
-			idString := c.Param("note-id")
-			id, _ := strconv.Atoi(idString)
-
-			store := notestorage.NewSQLStore(db)
-			biz := notebusiness.NewDeleteNoteBiz(store)
-
-			err := biz.DeleteNote(id)
-
-			if err != nil {
-				c.JSON(400, gin.H{"error": err.Error()})
-				return
-			}
-
-			c.JSON(200, gin.H{"data": 1})
-		})
+		notes.DELETE("/:note-id", ginnote.DeleteNote(appCtx))
 	}
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")

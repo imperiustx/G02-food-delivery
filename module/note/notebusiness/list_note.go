@@ -1,11 +1,13 @@
 package notebusiness
 
 import (
+	"context"
+	"fooddlv/common"
 	"fooddlv/module/note/notemodel"
 )
 
 type ListNoteStorage interface {
-	ListNote() ([]notemodel.Note, error)
+	ListNote(ctx context.Context, filter *notemodel.Filter, paging *common.Paging) ([]notemodel.Note, error)
 }
 
 type listNote struct {
@@ -16,6 +18,12 @@ func NewListNoteBiz(store ListNoteStorage) *listNote {
 	return &listNote{store: store}
 }
 
-func (biz *listNote) ListAllNote() ([]notemodel.Note, error) {
-	return biz.store.ListNote()
+func (biz *listNote) ListAllNote(ctx context.Context, filter *notemodel.Filter, paging *common.Paging) ([]notemodel.Note, error) {
+	data, err := biz.store.ListNote(ctx, filter, paging)
+
+	if err != nil {
+		return nil, common.ErrCannotListEntity(notemodel.EntityName, err)
+	}
+
+	return data, nil
 }

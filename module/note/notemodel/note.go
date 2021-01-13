@@ -1,5 +1,7 @@
 package notemodel
 
+const EntityName = "Note"
+
 type Note struct {
 	Id      int    `json:"id" gorm:"column:id;"`
 	Title   string `json:"title" gorm:"column:title;"`
