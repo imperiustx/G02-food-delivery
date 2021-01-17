@@ -1,8 +1,11 @@
 package notestorage
 
-import "fooddlv/module/note/notemodel"
+import (
+	"context"
+	"fooddlv/module/note/notemodel"
+)
 
-func (store *sqlStore) FindNote(id int) (*notemodel.Note, error) {
+func (store *sqlStore) FindNote(context context.Context, id int) (*notemodel.Note, error) {
 	db := store.db
 	var note notemodel.Note
 

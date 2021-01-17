@@ -18,7 +18,7 @@ func DeleteNote(appCtx appctx.AppContext) func(c *gin.Context) {
 		store := notestorage.NewSQLStore(db)
 		biz := notebusiness.NewDeleteNoteBiz(store)
 
-		err := biz.DeleteNote(id)
+		err := biz.DeleteNote(c.Request.Context(), id)
 
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
