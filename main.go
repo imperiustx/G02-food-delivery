@@ -11,13 +11,15 @@ import (
 
 func main() {
 	dsn := os.Getenv("DB_CONNECTION_STRING")
+	secret := os.Getenv("SECRET_KEY")
+
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	appCtx := appctx.NewAppContext(db)
+	appCtx := appctx.NewAppContext(db, secret)
 
 	r := gin.Default()
 

@@ -2,37 +2,49 @@ package appctx
 
 import (
 	"gorm.io/gorm"
-	"sync"
 )
 
 type AppContext interface {
 	GetDBConnection() *gorm.DB
+	SecretKey() string
 }
 
 type appContext struct {
-	db       *gorm.DB
-	o        *sync.Once
-	isLoaded bool
+	db     *gorm.DB
+	secret string
 }
 
-func NewAppContext(db *gorm.DB) *appContext {
-	return &appContext{db: db, o: new(sync.Once)}
+func NewAppContext(db *gorm.DB, secret string) *appContext {
+	return &appContext{
+		db:     db,
+		secret: secret,
+	}
 }
 
 func (ctx *appContext) GetDBConnection() *gorm.DB {
-	//ctx.o.Do(func() {
-	//	time.Sleep(time.Second * 10)
-	//})
-	//
-	//go func() {
-	//	for {
-	//		time.Sleep(time.Second * 5)
-	//		ctx.db.DisableAutomaticPing
-	//		if err := ctx.db.Ping(); err != nil {
-	//			ctx.o = new(sync.Once)
-	//		}
-	//	}
-	//}()
-
 	return ctx.db.Session(&gorm.Session{NewDB: true})
+}
+
+func (ctx *appContext) SecretKey() string {
+	return ctx.secret
+}
+
+type tokenExpiry struct {
+	atExp int
+	rtExp int
+}
+
+func NewTokenConfig() tokenExpiry {
+	return tokenExpiry{
+		atExp: 60 * 60 * 24 * 7,
+		rtExp: 60 * 60 * 24 * 7 * 2,
+	}
+}
+
+func (tk tokenExpiry) GetAtExp() int {
+	return tk.atExp
+}
+
+func (tk tokenExpiry) GetRtExp() int {
+	return tk.rtExp
 }
