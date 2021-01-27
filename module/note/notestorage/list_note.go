@@ -10,6 +10,7 @@ func (store *sqlStore) ListNote(
 	context context.Context,
 	filter *notemodel.Filter,
 	paging *common.Paging,
+	moreKeys ...string,
 ) ([]notemodel.Note, error) {
 	db := store.db
 	var notes []notemodel.Note
@@ -27,6 +28,10 @@ func (store *sqlStore) ListNote(
 	}
 
 	db = db.Limit(paging.Limit)
+
+	for _, k := range moreKeys {
+		db = db.Preload(k)
+	}
 
 	if paging.Cursor > 0 {
 		db = db.Where("id < ?", paging.Cursor)

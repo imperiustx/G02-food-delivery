@@ -11,14 +11,17 @@ type CreateNoteStore interface {
 }
 
 type createNoteBiz struct {
-	store CreateNoteStore
+	store     CreateNoteStore
+	requester common.Requester
 }
 
-func NewCreateNoteBiz(store CreateNoteStore) *createNoteBiz {
-	return &createNoteBiz{store: store}
+func NewCreateNoteBiz(store CreateNoteStore, requester common.Requester) *createNoteBiz {
+	return &createNoteBiz{store: store, requester: requester}
 }
 
 func (biz *createNoteBiz) CreateNewNote(context context.Context, data *notemodel.NoteCreate) error {
+	data.UserId = biz.requester.GetUserId()
+
 	if err := biz.store.CreateNote(context, data); err != nil {
 		return common.ErrCannotCreateEntity(notemodel.EntityName, err)
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 type ListNoteStorage interface {
-	ListNote(ctx context.Context, filter *notemodel.Filter, paging *common.Paging) ([]notemodel.Note, error)
+	ListNote(ctx context.Context, filter *notemodel.Filter, paging *common.Paging, moreKeys ...string) ([]notemodel.Note, error)
 }
 
 type listNote struct {
@@ -19,7 +19,7 @@ func NewListNoteBiz(store ListNoteStorage) *listNote {
 }
 
 func (biz *listNote) ListAllNote(ctx context.Context, filter *notemodel.Filter, paging *common.Paging) ([]notemodel.Note, error) {
-	data, err := biz.store.ListNote(ctx, filter, paging)
+	data, err := biz.store.ListNote(ctx, filter, paging, "User")
 
 	if err != nil {
 		return nil, common.ErrCannotListEntity(notemodel.EntityName, err)

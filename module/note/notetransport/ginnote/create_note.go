@@ -19,13 +19,16 @@ func CreateNote(appCtx appctx.AppContext) func(c *gin.Context) {
 
 		db := appCtx.GetDBConnection()
 		store := notestorage.NewSQLStore(db)
+		requester := c.MustGet(common.CurrentUser).(common.Requester)
+		bizNote := notebusiness.NewCreateNoteBiz(store, requester)
 
-		bizNote := notebusiness.NewCreateNoteBiz(store)
+		data.UserId = requester.GetUserId()
+
 		err := bizNote.CreateNewNote(c.Request.Context(), &data)
 
 		//note, err := notebusiness.NewGetNoteBiz(store).GetNote(c.Request.Context(), data.Id)
 
-		data.GenUID(common.DBTypeNote, 1)
+		data.Mask(true)
 
 		if err != nil {
 			panic(err)

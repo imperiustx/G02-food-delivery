@@ -37,7 +37,7 @@ func ListNote(appCtx appctx.AppContext) func(c *gin.Context) {
 		}
 
 		for i := range notes {
-			notes[i].GenUID(common.DBTypeNote, 1)
+			notes[i].Mask(true)
 		}
 
 		c.JSON(200, common.NewSuccessResponse(notes, paging, filter))

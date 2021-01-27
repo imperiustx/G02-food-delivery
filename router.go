@@ -15,7 +15,11 @@ func setupRouter(r *gin.Engine, appCtx appctx.AppContext) {
 	v1.POST("/register", ginuser.Register(appCtx))
 	v1.POST("/login", ginuser.Login(appCtx))
 
-	notes := v1.Group("/notes")
+	v1.GET("/profile", middleware.RequiredAuth(appCtx), ginuser.GetProfile(appCtx))
+
+	//users := v1.Group("users", middleware.RequiredAuth(appCtx))
+
+	notes := v1.Group("/notes", middleware.RequiredAuth(appCtx))
 	{
 		notes.GET("", ginnote.ListNote(appCtx))
 		notes.POST("", ginnote.CreateNote(appCtx))

@@ -4,6 +4,7 @@ import "fooddlv/common"
 
 type NoteCreate struct {
 	common.SQLModelCreate `json:",inline"`
+	UserId                int            `json:"-" gorm:"column:user_id;"`
 	Title                 string         `json:"title" gorm:"column:title;"`
 	Content               string         `json:"content" gorm:"column:content;"`
 	Cover                 *common.Image  `json:"cover" gorm:"column:cover;"`
@@ -12,4 +13,8 @@ type NoteCreate struct {
 
 func (NoteCreate) TableName() string {
 	return Note{}.TableName()
+}
+
+func (n *NoteCreate) Mask(isAdmin bool) {
+	n.GenUID(common.DBTypeNote, 1)
 }
