@@ -13,11 +13,12 @@ type DeleteNoteStore interface {
 }
 
 type deleteNoteBiz struct {
-	store DeleteNoteStore
+	store     DeleteNoteStore
+	requester common.Requester
 }
 
-func NewDeleteNoteBiz(store DeleteNoteStore) *deleteNoteBiz {
-	return &deleteNoteBiz{store: store}
+func NewDeleteNoteBiz(store DeleteNoteStore, requester common.Requester) *deleteNoteBiz {
+	return &deleteNoteBiz{store: store, requester: requester}
 }
 
 func (biz *deleteNoteBiz) DeleteNote(context context.Context, id int) error {
@@ -31,8 +32,15 @@ func (biz *deleteNoteBiz) DeleteNote(context context.Context, id int) error {
 		return common.ErrCannotGetEntity(notemodel.EntityName, errors.New("note note found"))
 	}
 
+	isAuthor := biz.requester.GetUserId() == note.UserId
+	isAdmin := biz.requester.GetRole() == "admin"
+
+	if !isAuthor && !isAdmin {
+		return common.ErrNoPermission(nil)
+	}
+
 	if err := biz.store.DeleteNote(id); err != nil {
-		return err
+		return common.ErrCannotDeleteEntity(notemodel.EntityName, err)
 	}
 
 	return nil

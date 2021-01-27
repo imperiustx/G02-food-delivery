@@ -23,6 +23,10 @@ func (User) TableName() string {
 	return "users"
 }
 
+func (u *User) Mask(isAdmin bool) {
+	u.GenUID(common.DBTypeUser, 1)
+}
+
 func (u *User) GetUserId() int {
 	return u.Id
 }
