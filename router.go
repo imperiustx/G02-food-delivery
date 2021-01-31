@@ -5,6 +5,7 @@ import (
 	"fooddlv/middleware"
 	"fooddlv/module/note/notetransport/ginnote"
 	"fooddlv/module/user/usertransport/ginuser"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,9 +16,10 @@ func setupRouter(r *gin.Engine, appCtx appctx.AppContext) {
 	v1.POST("/register", ginuser.Register(appCtx))
 	v1.POST("/login", ginuser.Login(appCtx))
 
-	v1.GET("/profile", middleware.RequiredAuth(appCtx), ginuser.GetProfile(appCtx))
-
-	//users := v1.Group("users", middleware.RequiredAuth(appCtx))
+	users := v1.Group("users", middleware.RequiredAuth(appCtx))
+	{
+		users.GET("/:user-id", ginuser.GetProfile(appCtx))
+	}
 
 	notes := v1.Group("/notes", middleware.RequiredAuth(appCtx))
 	{
